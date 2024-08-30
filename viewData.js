@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
-const { connectToMongoDB, disconnectFromMongoDB, mongoURI } = require('./db');
+require('dotenv').config();
+const { connectToMongoDB, disconnectFromMongoDB } = require('./db');
 
 const fetchUsers = async () => {
   try {
