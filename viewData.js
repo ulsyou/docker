@@ -1,46 +1,51 @@
-require('dotenv').config();
 const mongoose = require('mongoose');
+const { connectToMongoDB, disconnectFromMongoDB, mongoURI } = require('./db');
 
-// Define the schema for the User model
-const userSchema = new mongoose.Schema({
-  _id: mongoose.Schema.Types.ObjectId,
-  name: String,
-  email: String,
-  password: String
-});
-
-const User = mongoose.model('User', userSchema, 'users');
-
-// Connect to MongoDB
-const mongoUri = process.env.MONGO_URI;
-
-mongoose.connect(mongoUri, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-})
-.then(async () => {
-  console.log('MongoDB connected');
-
+const fetchUsers = async () => {
   try {
+    const User = mongoose.model('User', new mongoose.Schema({}, { strict: false }), 'users');
+    
     console.log('Fetching the first 5 users...');
-    const users = await User.find().limit(5);
+    const users = await User.find({}).limit(5).exec();
     console.log('First 5 Users:', users);
-
-    const userId = '59b99db4cfa9a34dcd7885b6'; 
-    console.log(`Fetching user with _id: ${userId}`);
-    const userById = await User.findById(userId);
+    
+    console.log('Fetching user with _id: 59b99db4cfa9a34dcd7885b6');
+    const userById = await User.findById('59b99db4cfa9a34dcd7885b6').exec();
     console.log('User by _id:', userById);
 
-    const email = 'sean_bean@gameofthron.es'; 
-    console.log(`Fetching user with email: ${email}`);
-    const userByEmail = await User.findOne({ email });
+    console.log('Fetching user with email: sean_bean@gameofthron.es');
+    const userByEmail = await User.findOne({ email: 'sean_bean@gameofthron.es' }).exec();
     console.log('User by email:', userByEmail);
-
-  } catch (error) {
-    console.error('Error occurred:', error);
-  } finally {
-    await mongoose.disconnect();
-    console.log('MongoDB disconnected');
+    
+  } catch (err) {
+    console.error('Error fetching users:', err);
   }
-})
-.catch(err => console.error('MongoDB connection error:', err));
+};
+
+const fetchMovies = async () => {
+  try {
+    const Movie = mongoose.model('Movie', new mongoose.Schema({}, { strict: false }), 'movies');
+    
+    console.log('Fetching the first 5 movies...');
+    const movies = await Movie.find({}).limit(5).exec();
+    console.log('First 5 Movies:', movies);
+    
+    console.log('Fetching movie with _id: 573a1390f29313caabcd5293');
+    const movieById = await Movie.findById('573a1390f29313caabcd5293').exec();
+    console.log('Movie by _id:', movieById);
+    
+  } catch (err) {
+    console.error('Error fetching movies:', err);
+  }
+};
+
+const main = async () => {
+  await connectToMongoDB();
+
+  await fetchUsers();
+  await fetchMovies();
+
+  await disconnectFromMongoDB();
+};
+
+main();
