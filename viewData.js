@@ -1,9 +1,17 @@
 require('dotenv').config();
 const mongoose = require('mongoose');
-const Comment = require('./models/Comment');
-const Movie = require('./models/Movie');
-const User = require('./models/User');
 
+// Define the schema for the User model
+const userSchema = new mongoose.Schema({
+  _id: mongoose.Schema.Types.ObjectId,
+  name: String,
+  email: String,
+  password: String
+});
+
+const User = mongoose.model('User', userSchema, 'users');
+
+// Connect to MongoDB
 const mongoUri = process.env.MONGO_URI;
 
 mongoose.connect(mongoUri, {
@@ -14,23 +22,25 @@ mongoose.connect(mongoUri, {
   console.log('MongoDB connected');
 
   try {
-    // Truy vấn các collection
-    console.log('Fetching comments...');
-    const comments = await Comment.find().limit(5);
-    console.log('Comments:', comments);
+    console.log('Fetching the first 5 users...');
+    const users = await User.find().limit(5);
+    console.log('First 5 Users:', users);
 
-    console.log('Fetching movies...');
-    const movies = await Movie.find().limit(5);
-    console.log('Movies:', movies);
+    const userId = '59b99db4cfa9a34dcd7885b6'; 
+    console.log(`Fetching user with _id: ${userId}`);
+    const userById = await User.findById(userId);
+    console.log('User by _id:', userById);
 
-    console.log('Fetching users...');
-    const users = await User.find().limit(5); 
-    console.log('Users:', users);
+    const email = 'sean_bean@gameofthron.es'; 
+    console.log(`Fetching user with email: ${email}`);
+    const userByEmail = await User.findOne({ email });
+    console.log('User by email:', userByEmail);
 
   } catch (error) {
     console.error('Error occurred:', error);
   } finally {
     await mongoose.disconnect();
+    console.log('MongoDB disconnected');
   }
 })
 .catch(err => console.error('MongoDB connection error:', err));
